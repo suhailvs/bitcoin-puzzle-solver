@@ -4,20 +4,19 @@ extern crate rand;
 extern crate reqwest;
 extern crate secp256k1;
 
-mod on_found;
 
 use bitcoin::network::constants::Network;
 use bitcoin::util::address::Address;
 use bitcoin::util::key::PrivateKey;
-use on_found::OnFound;
+
 use rand::Rng;
 use std::env;
 use std::thread;
 use std::time::Instant;
 use thousands::Separable;
 
-const POWER: u32 = 74;
-const TARGET: &str = "1FWGcVDK3JGzCC3WtkYetULPszMaK2Jksv";
+const POWER: u32 = 21;
+const TARGET: &str = "14oFNXucftsHiUMY8uctg6N487riuyXs4h";
 
 const CONSOLE_PRINT_THRESHOLD: u128 = 500_000_000;
 
@@ -29,7 +28,7 @@ fn main() {
         args[1].parse().expect("Failed to parse number of threads")
     };
 
-    let begin = 2u128.pow(POWER - 1);
+    let begin = 1;
     let end: u128 = 2u128.pow(POWER);
 
     println!(
@@ -46,7 +45,7 @@ fn main() {
     for _ in 0..num_threads {
         let handle = thread::spawn(move || {
             let mut rng = rand::thread_rng();
-            random_lookfor(rng.gen_range(begin..end), Some(&on_found::on_found));
+            random_lookfor(rng.gen_range(begin..end));
         });
         handles.push(handle);
     }
@@ -56,7 +55,7 @@ fn main() {
     }
 }
 
-fn random_lookfor(begin: u128, on_found: Option<&OnFound>) {
+fn random_lookfor(begin: u128) {
     println!(
         "{:?} starts searching from {}",
         thread::current().id(),
@@ -87,10 +86,6 @@ fn random_lookfor(begin: u128, on_found: Option<&OnFound>) {
                 private_key,
                 address
             );
-           
-            if let Some(on_found_callback) = on_found {
-                on_found_callback(value, private_key, address);
-            }
             break;
         }
 
